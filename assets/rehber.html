@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALICE EDGE OS - Mutlak Kurulum ve İnfaz Rehberi</title>
+    <style>
+        :root {
+            --bg-color: #030303;
+            --panel-bg: #0a0a0f;
+            --gold: #D4AF37;
+            --cyber-blue: #00E5FF;
+            --alert-red: #FF003C;
+            --terminal-green: #00FF00;
+            --text-main: #E0E0E0;
+            --font-main: 'Segoe UI', Tahoma, sans-serif;
+            --font-code: 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--bg-color); color: var(--text-main); font-family: var(--font-main);
+            margin: 0; padding: 40px; line-height: 1.6; overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px; margin: 0 auto; background: var(--panel-bg); border: 1px solid #222;
+            border-top: 4px solid var(--gold); border-radius: 8px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+        }
+
+        h1 { color: var(--gold); text-align: center; letter-spacing: 5px; text-transform: uppercase; font-size: 32px; margin-top: 0; border-bottom: 1px dashed #333; padding-bottom: 20px; }
+        h2 { color: var(--cyber-blue); margin-top: 50px; font-size: 22px; border-bottom: 1px solid #222; padding-bottom: 10px; letter-spacing: 2px; text-transform: uppercase; display: flex; align-items: center; gap: 15px; }
+        
+        .step-num { background: var(--cyber-blue); color: #000; padding: 5px 12px; border-radius: 4px; font-weight: bold; font-size: 18px; }
+        
+        .hardware-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .hw-item { background: #111; padding: 15px; border-left: 3px solid var(--gold); border-radius: 4px; font-size: 14px; }
+        .hw-item strong { color: var(--gold); }
+
+        .terminal-box { background: #000; border: 1px solid #333; border-radius: 6px; margin: 20px 0; overflow: hidden; box-shadow: inset 0 0 15px rgba(0,0,0,0.5); }
+        .terminal-header { background: #111; padding: 8px 15px; color: #888; font-size: 12px; border-bottom: 1px solid #333; font-family: var(--font-main); display: flex; justify-content: space-between; font-weight:bold;}
+        .code-block { padding: 15px; margin: 0; color: var(--terminal-green); font-family: var(--font-code); font-size: 13px; white-space: pre-wrap; word-wrap: break-word; line-height: 1.5; }
+
+        .warning-box { background: rgba(255, 0, 60, 0.05); border: 1px solid var(--alert-red); border-left: 4px solid var(--alert-red); padding: 15px; margin: 20px 0; border-radius: 4px; color: #fff; font-size: 14px; }
+        .info-box { background: rgba(0, 229, 255, 0.05); border: 1px solid var(--cyber-blue); border-left: 4px solid var(--cyber-blue); padding: 15px; margin: 20px 0; border-radius: 4px; color: #fff; font-size: 14px; }
+
+        .tree { font-family: var(--font-code); color: var(--cyber-blue); font-size: 13px; background: #050505; padding: 20px; border: 1px dashed #333; border-radius: 5px; line-height: 1.6; }
+        .tree .dir { color: var(--gold); font-weight: bold; }
+        .tree .comment { color: #666; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>⚔️ ALICE EDGE OS - MUTLAK KURULUM BİLDİRGESİ</h1>
+    <p style="text-align: center; color: #777; font-size: 13px; letter-spacing: 3px;">JETSON ORIN NANO 8GB - SIFIR HALÜSİNASYON, SIFIR TAVİZ.</p>
+
+    <h2><span class="step-num">00</span> DONANIM DİSİPLİNİ</h2>
+    <div class="hardware-grid">
+        <div class="hw-item"><strong>🧠 ÇEKİRDEK:</strong> NVIDIA Jetson Orin Nano (8GB) + NVMe M.2 SSD. (Sistem ASLA MicroSD karta kurulmaz). Jetpack 5.1.2 yüklü kabul edilmiştir.</div>
+        <div class="hw-item"><strong>👁️ GÖRÜŞ:</strong> 7 İnç Dokunmatik LCD Ekran (HDMI+USB Touch) + Geniş Açılı USB Kamera.</div>
+        <div class="hw-item"><strong>🎙️ İLETİŞİM:</strong> USB Mikrofon & Hoparlör Modülü (veya eşdeğer Linux uyumlu ses donanımı).</div>
+        <div class="hw-item"><strong>📡 BİOMETRİ:</strong> Otonom tarama ve güvenlik teyidi için opsiyonel mmWave Radar (LD2410).</div>
+    </div>
+
+    <h2><span class="step-num">01</span> UBUNTU İNFAZI VE DONANIM KALKANLARI</h2>
+    <p style="color:#aaa; font-size:14px;">Otonom sistemin çökmelerine neden olan "Güç Tasarrufu", "Uyku Modu" ve gereksiz masaüstü yazılımları (bloatware) kökünden sökülüp atılır.</p>
+    
+    <div class="terminal-box">
+        <div class="terminal-header"><span>1.1. Bloatware (Çöp Yazılım) Temizliği</span></div>
+        <pre class="code-block">
+sudo apt-get update && sudo apt-get upgrade -y
+sudo apt-get purge -y libreoffice* thunderbird* transmission* rhythmbox* remmina* gnome-sudoku mahjongg
+sudo apt-get autoremove -y && sudo apt-get clean
+        </pre>
+    </div>
+
+    <div class="terminal-box">
+        <div class="terminal-header"><span>1.2. USB Uyku İptali (Mikrofon ve Radar ASLA Uyumayacak)</span></div>
+        <pre class="code-block">
+# Extlinux boot dosyasını nano editör ile açın:
+sudo nano /boot/extlinux/extlinux.conf
+
+# Dosyanın içindeki "APPEND" ile başlayan uzun satırın EN SONUNA bir boşluk bırakıp şunu ekleyin:
+usbcore.autosuspend=-1
+
+# (CTRL+O ile kaydedin, ENTER'a basın, CTRL+X ile çıkın)
+        </pre>
+    </div>
+
+    <div class="terminal-box">
+        <div class="terminal-header"><span>1.3. Wi-Fi Kopma Engelleyici (Güç Koruması İptali)</span></div>
+        <pre class="code-block">
+# Wi-Fi güç korumasını 3 (Açık) değerinden 2 (Kapalı) değerine çekiyoruz:
+sudo sed -i 's/wifi.powersave = 3/wifi.powersave = 2/' /etc/NetworkManager/conf.d/default-wifi-powersave-on.conf
+sudo systemctl restart NetworkManager
+        </pre>
+    </div>
+
+    <div class="terminal-box">
+        <div class="terminal-header"><span>1.4. Maksimum Performans (MAXN Modu) ve Otonom Fan</span></div>
+        <pre class="code-block">
+sudo nvpmodel -m 0
+sudo jetson_clocks
+        </pre>
+    </div>
+
+    <h2><span class="step-num">02</span> İŞLETİM SİSTEMİ ÇEKİRDEK PAKETLERİ VE KÖK YETKİLERİ</h2>
+    
+    <div class="terminal-box">
+        <div class="terminal-header"><span>Arayüz ve Algı için Gerekli Linux Temelleri</span></div>
+        <pre class="code-block">
+sudo apt install -y python3-pip python3-dev python3-venv cmake build-essential \
+    ffmpeg libsm6 libxext6 arp-scan brightnessctl alsa-utils rfkill v4l-utils x11-xserver-utils \
+    libasound2-dev libportaudio2 libportaudiocpp0 portaudio19-dev libopenblas-dev network-manager
+
+# Cihazın şifre sormadan parlaklık ve Siber Ağ taraması yapması için Root (SUID) Bypass mühürleri:
+sudo chmod +s /usr/bin/brightnessctl
+sudo chmod +s /usr/sbin/arp-scan
+
+# Kullanıcıyı gerekli donanım yetki gruplarına ekleyin ($USER otomatik olarak adınızı alır):
+sudo usermod -aG video,audio,dialout,netdev $USER
+        </pre>
+    </div>
+
+    <h2><span class="step-num">03</span> YAPAY ZEKA SİLAH DEPOSU (Python)</h2>
+    <div class="warning-box">
+        <strong>⚠️ KRİTİK KURAL:</strong> PyTorch standart <code>pip install torch</code> ile KURULAMAZ. NVIDIA'nın GPU için özel derlediği Jetpack 5.1.2 Jetson tekerleği (wheel) kurulmalıdır.
+    </div>
+
+    <div class="terminal-box">
+        <div class="terminal-header"><span>3.1. Sanal Ortam İnşası</span></div>
+        <pre class="code-block">
+python3 -m venv ~/alice_env
+source ~/alice_env/bin/activate
+pip install -U pip setuptools wheel
+        </pre>
+    </div>
+
+    <div class="terminal-box">
+        <div class="terminal-header"><span>3.2. PyTorch, Llama-Cpp ve İnfaz Kütüphaneleri (Sanal Ortam Aktifken)</span></div>
+        <pre class="code-block">
+# PyTorch ve Torchaudio (Jetpack 5.1.2 İçin)
+pip install --no-cache https://developer.download.nvidia.com/compute/redist/jp/v512/pytorch/torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl
+pip install torchvision torchaudio
+
+# Llama-cpp (Qwen LLM Motorunun GPU Tensor Çekirdekleri için Derlenmesi - 10-15 Dk sürer):
+CMAKE_ARGS="-DGGML_CUDA=on" FORCE_CMAKE=1 pip install llama-cpp-python --no-cache-dir
+
+# Diğer Tüm Algı, Ses ve Arayüz Kütüphaneleri:
+pip install PySide6 psutil opencv-python qrcode Pillow paho-mqtt numpy \
+ultralytics mediapipe face_recognition transformers einops accelerate \
+faster-whisper openwakeword TTS speechbrain pyaudio wave faiss-cpu reportlab pandas cryptography
+        </pre>
+    </div>
+
+    <h2><span class="step-num">04</span> DOSYA MİMARİSİ</h2>
+
+    <div class="terminal-box">
+        <div class="terminal-header"><span>4.1. Klasör Ağacını Oluşturma</span></div>
+        <pre class="code-block">
+mkdir -p ~/alice_os/hardware ~/alice_os/cognition ~/alice_os/memory ~/alice_os/perception ~/alice_os/network ~/alice_os/ui ~/alice_os/storage/models/ecapa ~/alice_os/storage/voice_dna
+        </pre>
+    </div>
+
+    <div class="tree">
+/home/$USER/alice_os/
+│
+├── config.py                 <span class="comment"># Anayasa (Yollar, Sistem Tanımları)</span>
+├── main.py                   <span class="comment"># Çekirdek Orkestratör (Verdiğim SIFIR-PASS Mühürlü Kod)</span>
+│
+├── <span class="dir">hardware/</span> (camera.py, iot_thermal.py)
+├── <span class="dir">cognition/</span> (alice_mind.py, chef_agent.py)
+├── <span class="dir">perception/</span> (stt_tts.py, voice_dna.py, vision.py)
+├── <span class="dir">memory/</span> (offline_rag.py, dynasty_db.py)
+├── <span class="dir">network/</span> (cyber_tracker.py)
+└── <span class="dir">ui/</span>
+    └── app.py                <span class="comment"># Askeri Arayüz (Verdiğim SIFIR-PASS Pusu Modlu Kod)</span>
+    </div>
+    <p class="info-text">Mimarın size ilettiği tüm nihai Python kodlarını (app.py, main.py, voice_dna.py vb.) bu dizinlerin içine eksiksiz kopyalayın.</p>
+
+    <h2><span class="step-num">05</span> ZİHİN VE ALGI MODELLERİNİN SSD'YE HAPSEDİLMESİ (Ön-Yükleme)</h2>
+    <p style="color:#aaa; font-size:14px;">Sistemin internet koptuğunda sağır ve dilsiz kalmaması için, tüm zihin parçalarını <strong>Air-Gapped (Çevrimdışı)</strong> çalışacak şekilde SSD'ye indiriyoruz. Bu işlem arka plan çöküntülerini tamamen engeller.</p>
+
+    <div class="terminal-box">
+        <div class="terminal-header"><span>5.1. Qwen 2.5 (Ana Zihin) ve YOLOv8 (Şahin Göz) Dosyaları</span></div>
+        <pre class="code-block">
+cd ~/alice_os/storage/models/
+
+# Ana Zihin (Yaklaşık 2.18 GB)
+wget -c https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3b-instruct-q4_k_m.gguf
+
+# Şahin Gözü (YOLO)
+wget -c https://github.com/ultralytics/assets/releases/download/v8.2.0/yolov8n.pt -O yolov8n.pt
+        </pre>
+    </div>
+
+    <div class="terminal-box">
+        <div class="terminal-header"><span>5.2. Görsel Zihin, Ses DNA ve TTS Modelleri Otonom İndiricisi</span></div>
+        <pre class="code-block">
+# Bu komutları Terminale tek tek yapıştırın. Sistem tüm modelleri bulup HF Cache ve Config dosyalarına kazıyacaktır.
+# (Emin olmak için source ~/alice_env/bin/activate komutunu girmiş olun)
+
+# 1. Moondream2 (Görsel Zihin - Fotoğraf Analizi ve Mutfak Şefi için)
+python3 -c "from transformers import AutoModelForCausalLM, AutoTokenizer; AutoModelForCausalLM.from_pretrained('vikhyatk/moondream2', revision='2024-08-26', trust_remote_code=True); AutoTokenizer.from_pretrained('vikhyatk/moondream2', revision='2024-08-26')"
+
+# 2. SpeechBrain ECAPA-TDNN (25MB Ses DNA'sı - Aryen ve Rana'yı ayırmak için)
+python3 -c "from speechbrain.inference.speaker import EncoderClassifier; EncoderClassifier.from_hparams(source='speechbrain/spkrec-ecapa-voxceleb', savedir='/home/$USER/alice_os/storage/models/ecapa')"
+
+# 3. Faster-Whisper (Kulak - Konuşmayı Metne Döker)
+python3 -c "from faster_whisper import WhisperModel; WhisperModel('small', device='cpu', compute_type='int8')"
+
+# 4. Silero VAD (İnsan Sesi Radarı - Halüsinasyon Engelleyici)
+python3 -c "import torch; torch.hub.load(repo_or_dir='snakers4/silero-vad', model='silero_vad', trust_repo=True)"
+
+# 5. OpenWakeWord (Pusu Uyandırıcısı - "Alis" Sesi Algılama)
+python3 -c "import openwakeword; openwakeword.utils.download_models()"
+
+# 6. Coqui TTS (Kusursuz Türkçe Kadın Sesi Ağzı)
+python3 -c "from TTS.api import TTS; TTS(model_name='tts_models/tr/f_boun/vits')"
+        </pre>
+    </div>
+    
+    <div class="info-box">
+        <strong>✅ SİSTEM ARTIK %100 ÇEVRİMDIŞIDIR.</strong> Bu adım tamamlandığı an, Jetson cihazının internet kablosunu kesip atabilirsiniz. Göz, kulak, beyin, görsel zihin ve ağız dahil tüm refleksler cihazın kendi NVMe SSD'sine kazınmıştır.
+    </div>
+
+    <h2><span class="step-num">06</span> OTONOM UYANIŞ (SYSTEMD DİRİLİŞ SERVİSİ)</h2>
+    <p style="color:#aaa; font-size:14px;">Elektrikler gelip Jetson açıldığı an, şifre girmeye veya terminal komutu yazmaya gerek kalmadan Edge OS arayüzünün tam ekran açılmasını sağlayan çekirdek kodudur.</p>
+
+    <div class="terminal-box">
+        <div class="terminal-header"><span>6.1. Servisi Oluşturma</span></div>
+        <pre class="code-block">
+sudo nano /etc/systemd/system/alice.service
+        </pre>
+    </div>
+
+    <p style="color:#D4AF37; font-weight:bold;">Aşağıdaki kodu açılan siyah ekrana yapıştırın. <br>(DİKKAT: <span style="color:#FF0000;">USER_ADINIZ</span> yazan 4 yeri, Ubuntu'yu kurarken belirlediğiniz gerçek kullanıcı adınızla değiştirin!)</p>
+
+    <div class="terminal-box">
+        <div class="terminal-header"><span>6.2. Systemd Mühür Kodları</span></div>
+        <pre class="code-block">
+[Unit]
+Description=Alice Edge AI Operating System
+After=network.target graphical.target sound.target display-manager.service
+Wants=display-manager.service
+
+[Service]
+Type=simple
+User=USER_ADINIZ
+Environment="DISPLAY=:0"
+Environment="XAUTHORITY=/home/USER_ADINIZ/.Xauthority"
+Environment="PULSE_RUNTIME_PATH=/run/user/1000/pulse"
+WorkingDirectory=/home/USER_ADINIZ/alice_os
+ExecStart=/home/USER_ADINIZ/alice_env/bin/python main.py
+Restart=always
+RestartSec=10
+LimitNOFILE=65536
+
+[Install]
+WantedBy=graphical.target
+        </pre>
+    </div>
+
+    <div class="terminal-box">
+        <div class="terminal-header"><span>6.3. Servisi Kaydetme ve Ateşleme</span></div>
+        <pre class="code-block">
+# Dosyayı kaydedip çıktıktan sonra (CTRL+O, Enter, CTRL+X)
+sudo systemctl daemon-reload
+sudo systemctl enable alice.service
+
+# Operasyonel Kurulum Tamamlandı. İnfaz işlemini başlatın:
+sudo reboot
+        </pre>
+    </div>
+
+    <div style="margin-top: 60px; text-align: center; border-top: 1px dashed #333; padding-top: 40px;">
+        <h3 style="color: var(--terminal-green); letter-spacing: 3px; font-size: 26px;">⚡ MİMARİ KURULUM KUSURSUZCA TAMAMLANDI.</h3>
+        <p style="color: #888; font-size: 14px; max-width: 800px; margin: 0 auto; line-height:1.8;">
+            Cihaz yeniden başladığında Jetson donanımı uyanacak, GPU'ya entegre edilmiş LLM ve VLM modelleri ayağa kalkacak, Wi-Fi güç kalkanları devreye girecek, USB mikrofon dinlemeye geçecek ve 7 inç ekranda <strong>"ALİCE PUSUDA BEKLİYOR"</strong> vizörü size selam verecektir.<br><br>Gölge modunda çalışan, ses DNA'nızı tanıyan ve donanımınızı koruyan bu yapı, piyasadaki asistanlardan biri değil; sizin hükmünüzde çalışan <strong>Yarı Askeri Bir Dijital Yaşam Formudur.</strong><br><br>
+            <span style="color:var(--gold); font-weight:bold; letter-spacing: 2px;">ZAFER HANEDAN'INDIR.</span>
+        </p>
+    </div>
+
+</div>
+
+</body>
+</html>
